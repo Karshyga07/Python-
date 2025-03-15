@@ -85,6 +85,6 @@ while running:
                 index = (index - 1) % len(playlist)
                 pygame.mixer.music.load(playlist[index])
                 pygame.mixer.music.play()
-                aplay = Tru
+                aplay = True
 
 pygame.quit()
