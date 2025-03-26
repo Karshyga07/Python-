@@ -149,7 +149,7 @@ while True:
     # --- UI отображение: текущий радиус, цвет и режим ---
     pygame.draw.rect(screen, pygame.Color("white"), (0, 0, 300, 30))
     renderRadius = font.render(str(radius), True, pygame.Color(color))  # Render the text showing the current radius
-    screen.blit(renderRadius, (5, 5)) 
+    screen.blit(renderRadius, (5, 5))   
 
     pygame.display.flip()
     clock.tick(FPS)

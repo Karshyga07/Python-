@@ -1,162 +1,184 @@
-import pygame
-import os
-import random
-import sys
-import time
+# Imports
+import pygame, sys
 from pygame.locals import *
+import random, time
+import os
 
+# Initialize
 pygame.init()
 
-# Настройки
+# Settings
 FPS = 60
-WIDTH, HEIGHT = 800, 600
-speed = 3
-score = 0
-coins = 0
+FramePerSec = pygame.time.Clock()
+SCREEN_WIDTH = 400
+SCREEN_HEIGHT = 600
+SPEED = 3
+SCORE = 0
+COINS = 0
+c1, c2, c3, c4, c5 = False, False, False, False, False
 
-# Цвета
-WHITE = (255, 255, 255)
+# Colors
+RED = (255, 0, 0)
 BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
 
-# Шрифт и экран
+# Fonts
 font = pygame.font.SysFont("Verdana", 20)
 font_small = pygame.font.SysFont("Verdana", 20)
 game_over = font.render("Game Over", True, BLACK)
 
-background = pygame.image.load(os.path.join("1-game-elements", "background.jpg"))
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("1-Game")
+# Background
+background = pygame.image.load(os.path.join("1-game-elements", "background.png"))
+screen = pygame.display.set_mode((500, 600))
+pygame.display.set_caption("Racer")
 
-# Флаги ускорения
-c1 = c2 = c3 = c4 = c5 = False
-
-# Игровые классы
+# --- CLASSES ---
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load(os.path.join("1-game-elements", "capybara.png"))
+        self.image = pygame.image.load(os.path.join("1-game-elements", "Enemy.png"))
         self.rect = self.image.get_rect()
-        self.rect.center = (random.randint(40, WIDTH - 40), 0)
+        self.reset_position()
+
+    def reset_position(self):
+        self.rect.center = (random.randint(40, SCREEN_WIDTH - 40), 0)
 
     def move(self):
-        global score
-        self.rect.move_ip(0, speed)
-        if self.rect.top > HEIGHT:
-            score += 1
-            self.rect.top = 0
-            self.rect.center = (random.randint(40, WIDTH - 40), 0)
+        global SCORE
+        self.rect.move_ip(0, SPEED)
+        if self.rect.top > SCREEN_HEIGHT:
+            SCORE += 1
+            self.reset_position()
 
 class Coin(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = pygame.image.load(os.path.join("1-game-elements", "coin.png"))
+        self.image = pygame.transform.scale(self.image, (40, 40))
         self.rect = self.image.get_rect()
-        self.rect.center = (random.randint(40, WIDTH - 40), random.randint(40, HEIGHT - 40))
+        self.reset_position()
+
+    def reset_position(self):
+        self.rect.center = (random.randint(40, SCREEN_WIDTH - 40), random.randint(40, SCREEN_HEIGHT - 40))
 
     def move(self):
-        global coins, speed, c1, c2, c3, c4, c5
-        if self.rect.bottom < HEIGHT // 3:
-            coins += 3
-        elif self.rect.bottom < HEIGHT // 1.5:
-            coins += 2
+        global COINS, SPEED, c1, c2, c3, c4, c5
+        if self.rect.bottom < SCREEN_HEIGHT // 3:
+            COINS += 3
+        elif self.rect.bottom < SCREEN_HEIGHT // 1.5:
+            COINS += 2
         else:
-            coins += 1
+            COINS += 1
 
-        if not c1 and coins >= 10:
-            speed += 1
-            c1 = True
-        if not c2 and coins >= 20:
-            speed += 1
-            c2 = True
-        if not c3 and coins >= 30:
-            speed += 1
-            c3 = True
-        if not c4 and coins >= 40:
-            speed += 1
-            c4 = True
-        if not c5 and coins >= 50:
-            speed += 1
-            c5 = True
+        # Increase speed at thresholds
+        if not c1 and COINS >= 10:
+            SPEED += 1; c1 = True
+        if not c2 and COINS >= 20:
+            SPEED += 1; c2 = True
+        if not c3 and COINS >= 30:
+            SPEED += 1; c3 = True
+        if not c4 and COINS >= 40:
+            SPEED += 1; c4 = True
+        if not c5 and COINS >= 50:
+            SPEED += 1; c5 = True
 
-        self.rect.center = (random.randint(40, WIDTH - 40), random.randint(40, HEIGHT - 40))
+        self.reset_position()
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load(os.path.join("1-game-elements", "cat.jpg"))
+        self.image = pygame.image.load(os.path.join("1-game-elements", "Player.png"))
         self.rect = self.image.get_rect()
         self.rect.center = (160, 520)
 
     def move(self):
-        pressed_keys = pygame.key.get_pressed()
-        if self.rect.left > 0 and pressed_keys[K_LEFT]:
+        pressed = pygame.key.get_pressed()
+        if pressed[K_LEFT] and self.rect.left > 0:
             self.rect.move_ip(-5, 0)
-        if self.rect.right < WIDTH and pressed_keys[K_RIGHT]:
+        if pressed[K_RIGHT] and self.rect.right < SCREEN_WIDTH:
             self.rect.move_ip(5, 0)
-        if self.rect.top > 0 and pressed_keys[K_UP]:
+        if pressed[K_UP] and self.rect.top > 0:
             self.rect.move_ip(0, -5)
-        if self.rect.bottom < HEIGHT and pressed_keys[K_DOWN]:
+        if pressed[K_DOWN] and self.rect.bottom < SCREEN_HEIGHT:
             self.rect.move_ip(0, 5)
 
-# Функция Game Over
+# --- Game Over ---
 def game_over_screen():
-    screen.fill(WHITE)
-    screen.blit(game_over, (300, 250))
-    pygame.display.flip()
-    time.sleep(2)
-    pygame.quit()
-    sys.exit()
+    screen.fill(RED)
+    screen.blit(game_over, (150, 250))
+    pygame.display.update()
 
-# Объекты
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit(); sys.exit()
+            if event.type == KEYDOWN:
+                if event.key == K_SPACE:
+                    return True
+                elif event.key == K_ESCAPE:
+                    return False
+
+# --- RESET GAME STATE ---
+def reset_game(player, enemy, coin):
+    global SCORE, COINS, SPEED, c1, c2, c3, c4, c5
+    SCORE = 0
+    COINS = 0
+    SPEED = 3
+    c1 = c2 = c3 = c4 = c5 = False
+    player.rect.center = (160, 520)
+    enemy.reset_position()
+    coin.reset_position()
+
+# --- INITIAL OBJECTS ---
 P1 = Player()
 E1 = Enemy()
 C1 = Coin()
 
-# Группы
-enemys = pygame.sprite.Group()
-enemys.add(E1)
+# Sprite Groups
+enemies = pygame.sprite.Group()
+enemies.add(E1)
 
 coins_group = pygame.sprite.Group()
 coins_group.add(C1)
 
 all_sprites = pygame.sprite.Group()
-all_sprites.add(P1)
-all_sprites.add(E1)
-all_sprites.add(C1)
+all_sprites.add(P1, E1, C1)
 
-# Событие увеличения скорости
+# Events
 INC_SPEED = pygame.USEREVENT + 1
 pygame.time.set_timer(INC_SPEED, 1000)
 
-# Фон
-FramePerSec = pygame.time.Clock()
 background_y = 0
 
-# --- Игровой цикл ---
+# --- MAIN LOOP ---
 while True:
     for event in pygame.event.get():
-        if event.type == INC_SPEED:
-            speed += 0.1
         if event.type == QUIT:
+            pygame.quit(); sys.exit()
+        if event.type == INC_SPEED:
+            SPEED += 0.1
+
+    # Check collisions
+    if pygame.sprite.spritecollideany(P1, enemies):
+        continue_game = game_over_screen()
+        if not continue_game:
             pygame.quit()
             sys.exit()
+        else:
+            reset_game(P1, E1, C1)
 
-    # Проверка столкновения с врагом
-    if pygame.sprite.spritecollideany(P1, enemys):
-        game_over_screen()
-
-    # Двигаем фон
-    background_y = (background_y + speed) % background.get_rect().height
+    # Scroll background
+    background_y = (background_y + SPEED) % background.get_height()
     screen.blit(background, (0, background_y))
-    screen.blit(background, (0, background_y - background.get_rect().height))
+    screen.blit(background, (0, background_y - background.get_height()))
 
-    # Тексты
-    score_text = font_small.render("Score: " + str(score), True, BLACK)
-    coins_text = font_small.render("Coins: " + str(coins), True, BLACK)
+    # Draw score & coins
+    score_text = font_small.render("Score: " + str(SCORE), True, BLACK)
+    coins_text = font_small.render("Coins: " + str(COINS), True, BLACK)
     screen.blit(score_text, (10, 10))
-    screen.blit(coins_text, (700, 10))
+    screen.blit(coins_text, (400, 10))
 
-    # Отрисовка и движение спрайтов
+    # Move & draw all sprites
     for entity in all_sprites:
         screen.blit(entity.image, entity.rect)
         if isinstance(entity, Coin) and pygame.sprite.collide_rect(P1, entity):
