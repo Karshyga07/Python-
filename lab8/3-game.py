@@ -146,7 +146,7 @@ while True:
                     DrawLine(screen, lastPos, event.pos, radius, "white")
             lastPos = event.pos
 
-    # --- UI отображение: текущий радиус, цвет и режим ---
+    # UI отображение: текущий радиус, цвет и режим
     pygame.draw.rect(screen, pygame.Color("white"), (0, 0, 300, 30))
     renderRadius = font.render(str(radius), True, pygame.Color(color))  # Render the text showing the current radius
     screen.blit(renderRadius, (5, 5))   
