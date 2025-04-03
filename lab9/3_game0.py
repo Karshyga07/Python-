@@ -44,6 +44,22 @@ def DrawLine(screen, start, end, width, color):
             x = int((-C - B * y) / A)
             pygame.draw.circle(screen, pygame.Color(color), (x, y), width)
 
+def DrawCircle(screen, start, end, width, color):
+    x1, y1 = start
+    x2, y2 = end
+    x = (x1 + x2) // 2
+    y = (y1 + y2) // 2
+    radius_calc = int(((x2 - x1)**2 + (y2 - y1)**2)**0.5 / 2)
+    pygame.draw.circle(screen, pygame.Color(color), (x, y), radius_calc, width)
+
+def DrawRectangle(screen, start, end, thickness, color):
+    x1, y1 = start
+    x2, y2 = end
+    top_left_x = min(x1, x2)
+    top_left_y = min(y1, y2)
+    rect_width = abs(x1 - x2)
+    rect_height = abs(y1 - y2)
+    pygame.draw.rect(screen, pygame.Color(color), (top_left_x, top_left_y, rect_width, rect_height), thickness)
 
 def DrawSquare(screen, color, start, end, thickness):
     x1, y1 = start
@@ -52,6 +68,12 @@ def DrawSquare(screen, color, start, end, thickness):
     top_left_x = min(x1, x2)
     top_left_y = min(y1, y2)
     pygame.draw.rect(screen, pygame.Color(color), (top_left_x, top_left_y, size, size), thickness)
+
+def DrawRightTriangle(screen, color, start, end, thickness):
+    x1, y1 = start
+    x2, y2 = end
+    points = [(x1, y1), (x2, y2), (x1, y2)] if x1 <= x2 else [(x1, y1), (x2, y2), (x2, y1)]
+    pygame.draw.polygon(screen, pygame.Color(color), points, thickness)
 
 
 # --- ОСНОВНОЙ ЦИКЛ ---
@@ -64,8 +86,14 @@ while True:
 
         # Клавиши
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_s: 
+            if event.key == pygame.K_r: 
+                mode = "rectangle"
+            elif event.key == pygame.K_c: 
+                mode = "circle"
+            elif event.key == pygame.K_s: 
                 mode = "square"
+            elif event.key == pygame.K_t: 
+                mode = "right_tri"
             elif event.key == pygame.K_e: 
                 mode = "erase"
             elif event.key == pygame.K_p: 
@@ -100,8 +128,14 @@ while True:
         # Мышь отпущена
         if event.type == pygame.MOUSEBUTTONUP:
             draw = False
-            if mode == "square":
+            if mode == "rectangle":
+                DrawRectangle(screen, prevPos, event.pos, radius, color)
+            elif mode == "square":
                 DrawSquare(screen, color, prevPos, event.pos, radius)
+            elif mode == "right_tri":
+                DrawRightTriangle(screen, color, prevPos, event.pos, radius)
+            elif mode == "circle":
+                DrawCircle(screen, prevPos, event.pos, radius, color)
 
         # Движение мыши
         if event.type == pygame.MOUSEMOTION:

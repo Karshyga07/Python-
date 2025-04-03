@@ -44,7 +44,8 @@ class Enemy(pygame.sprite.Sprite):
             SCORE += 1
             self.rect.top = 0
             self.rect.center = (random.randint(40, SCREEN_WIDTH - 40), 0)
-
+#added class Coin for coin to appear and to count the number of coins
+c1,c2,c3,c4,c5 = False, False, False, False, False
 class Coin(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -56,15 +57,32 @@ class Coin(pygame.sprite.Sprite):
     #adding different amount of coins depending on location of coin
     def move(self):
         global COINS
-        if self.rect.bottom < SCREEN_HEIGHT // 3:
+        global SPEED
+
+        if self.rect.bottom<SCREEN_HEIGHT//3:
             COINS += 3
-        elif self.rect.bottom < SCREEN_HEIGHT // 1.5:
+        elif self.rect.bottom<SCREEN_HEIGHT//1.5:
             COINS += 2
         else:
             COINS += 1
+        global c1,c2,c3,c4,c5
+        if not c1 and COINS>=10:
+            SPEED+=1
+            c1=True
+        if not c2 and COINS>=20:
+            SPEED+=1
+            c2=True
+        if not c3 and COINS>=30:
+            SPEED+=1
+            c3=True
+        if not c4 and COINS>=40:
+            SPEED+=1
+            c4=True
+        if not c5 and COINS>=50:
+            SPEED+=1
+            c5=True
         self.rect.top = random.randint(40, SCREEN_WIDTH - 40)
         self.rect.center = (random.randint(40, SCREEN_WIDTH - 40), random.randint(40, SCREEN_HEIGHT - 40))
-
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -106,7 +124,7 @@ all_sprites.add(C1)
 INC_SPEED = pygame.USEREVENT + 1
 pygame.time.set_timer(INC_SPEED, 1000)
 
-run = True
+
 def game_over_screen():
     screen.fill(RED)
     screen.blit(game_over, (30, 250))
@@ -115,16 +133,16 @@ def game_over_screen():
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
-                run = False
+                pygame.quit()
+                sys.exit()
             elif event.type == KEYDOWN:
                 if event.key == K_SPACE:  
                     return True
                 elif event.key == K_ESCAPE:  
                     return False
-                
+
 def handle_crash():
-    time.sleep(1)
-    return game_over_screen()
+    time.sleep(2)
 
 background_y = 0  
 while True:
@@ -140,10 +158,6 @@ while True:
         if not continue_game:
             pygame.quit()
             sys.exit()
-            
-        else:
-            P1.rect.center = (160, 520)
-            E1.rect.center = (random.randint(40, SCREEN_WIDTH - 40), 0)
 
     background_y = (background_y + SPEED) % background.get_height()
 
