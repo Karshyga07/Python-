@@ -80,8 +80,6 @@ while run:
         if new_head == food:
             food = random_food()
             speed += 1  # ускорение
-            
-        snake_body.pop()
 
         # проверка на стены и саму себя
         if (new_head[0] < 0 or new_head[0] >= WIDTH or
